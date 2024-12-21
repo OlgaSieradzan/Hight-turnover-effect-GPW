@@ -1,0 +1,566 @@
+---
+title: "ANOVA_Szczecin"
+author: "Olga Sieradzan"
+date: "2024-11-28"
+output: html_document
+---
+```{r}
+ library(readxl)
+library(ggplot2)
+Male <- read_excel("C:/Users/olgas/OneDrive/Documents/GitHub/Hight-turnover-effect-GPW/Anova_data.xlsx", 
+ sheet = "Małe")
+
+Duze <- read_excel("C:/Users/olgas/OneDrive/Documents/GitHub/Hight-turnover-effect-GPW/Anova_data.xlsx", 
+ sheet = "Duże")
+
+Male_v2 <- data.frame(
+  "Wielkość" = rep("Małe", nrow(Male)),
+  "Stopa zwrotu" = Male[["Mean"]]
+)
+
+Duza_v2 <- data.frame(
+  "Wielkość" = rep("Duże", nrow(Duze)),
+  "Stopa zwrotu" = Duze[["Mean"]]
+)
+
+Dane <- data.frame(
+  "Wielkość" = c(Male_v2$Wielkość, Duza_v2$Wielkość),
+  "Stopa_zwrotu" = c(Male_v2$Stopa.zwrotu, Duza_v2$Stopa.zwrotu)
+)
+```
+
+```{r}
+library(dplyr)
+library(tseries)
+
+results1 <-  Dane %>%
+  group_by(Wielkość) %>%
+  summarise(
+    P_value = jarque.bera.test(Stopa_zwrotu)$p.value,
+  )
+
+results1
+```
+
+```{r}
+s <- read_excel("GitHub/Hight-turnover-effect-GPW/s.xlsx")
+
+ ggplot() +
+    geom_density(aes(x = s$Mean), fill = "#698B22" , col= "#698B22", alpha = 0.6, size = 2) +
+    xlim(-0.3 , 0.3)+
+    theme_light(base_size = 18) +
+    labs (y = NULL,
+          x = "Stopy zwrotu z inwestycji ") 
+```
+
+
+```{r}
+ ggplot() +
+   geom_boxplot(aes(x = s$Mean), fill = "#698B22" , col= "#698B22", alpha = 0.6, size = 2) +
+    xlim(-0.3 , 0.3)+
+    theme_light(base_size = 18) +
+    labs (y = NULL,
+          x = "Stopy zwrotu z inwestycji ") 
+```
+
+```{r}
+library(moments)
+summary(s$Mean)
+
+kurtosis(s$Mean)
+```
+```{r}
+
+Stopy <- read_excel("zestaw_branze.xlsx",sheet = "Stopy_zwrotu")
+Skumulowane <- read_excel("zestaw_branze.xlsx",sheet = "Skumulowana")
+
+
+```
+
+```{r}
+Wyniki_koniec <- Skumulowane[3332, 2:25]
+colnames(Wyniki_koniec) <- c("10_1","10_2", "10_3", "10_4", "10_5", "10_10", "20_1","20_2", "20_3", "20_4", "20_5", "20_10", "30_1","30_2", "30_3", "30_4", "30_5", "30_10", "50_1","50_2", "50_3", "50_4", "50_5", "50_10")
+
+
+wyniki_df <- data.frame(
+  c("PGE", "PKO", "MBANK", "SANTANDER", "CD PROJECT", "WAS"),
+  c(6.11, 3.49, 3.93, 0.44,9.54,0.88)
+  
+)
+
+
+```
+
+```{r}
+library(ggplot2)
+colnames(wyniki_df) <- c("Nazwa", "Wartosc")
+wyniki_df <- wyniki_df[order(wyniki_df$Wartosc, decreasing = TRUE), ]
+wyniki_df$Kolor <- ifelse(wyniki_df$Wartosc >= 1, "#698B22", "#CD3700")
+
+# Rysowanie wykresu za pomocą ggplot2
+ggplot(wyniki_df, aes(x = reorder(Nazwa, -Wartosc), y = Wartosc, fill = Kolor)) +
+  geom_bar(stat = "identity", color = "black") +
+  scale_fill_identity() +
+  theme_minimal(base_size = 18) +
+  geom_hline(yintercept = 1)+
+  theme(axis.text.x = element_text(angle = 25, hjust = 1)) +
+  labs(title = NULL,
+       y = "Wartość inwestycji",
+       x = NULL)
+```
+
+```{r}
+ref_10 <- Skumulowane[,26:49]
+ref_20 <- Skumulowane[,50:73]
+ref_50 <- Skumulowane[,74:97]
+
+ref_10 <- rowMeans(ref_10)
+ref_20 <- rowMeans(ref_20)
+ref_50 <- rowMeans(ref_50)
+
+```
+
+```{r}
+ggplot() +
+  geom_bar(aes(x = factor(2), fill = ifelse(ref_20>= 1.70, "Powyżej 70%", "Poniżej 70%")),
+           color = "white", position = position_fill(reverse = TRUE)) +
+  geom_bar(aes(x = factor(1), fill = ifelse(ref_10 >= 1.70, "Powyżej 70%", "Poniżej 70%")),
+           color = "white", position = position_fill(reverse = TRUE)) +
+  geom_bar(aes(x = factor(3), fill = ifelse(ref_50 >= 1.70, "Powyżej 70%", "Poniżej 70%")),
+           color = "white", position = position_fill(reverse = TRUE)) +
+  scale_x_discrete(labels = c( "Energetyka", "Bankowość" ,"IT")) +
+  theme_bw(base_size = 18) +
+  scale_fill_manual(values = c("Powyżej 70%" = "#698B22", "Poniżej 70%" = "#CD3700")) +
+  labs(title = NULL,
+       x = NULL,
+       fill = NULL)
+```
+
+```{r}
+ref10 <- Skumulowane[,26:49]
+ref20 <- Skumulowane[,50:73]
+ref50 <- Skumulowane[,74:97]
+
+refe10 <- data.frame(do.call(cbind, list(ref10[,1:6], ref20[,1:6], ref50[,1:6], Skumulowane[,2:7])))
+refe20 <- data.frame(do.call(cbind, list(ref10[,7:12], ref20[,7:12], ref50[,7:12], Skumulowane[,8:13])))
+refe30 <- data.frame(do.call(cbind, list(ref10[,13:18], ref20[,13:18], ref50[,13:18], Skumulowane[,14:19])))
+refe50 <- data.frame(do.call(cbind, list(ref10[,19:24], ref20[,19:24], ref50[,19:24], Skumulowane[,20:25])))
+
+refe10 <- rowMeans(refe10)
+refe20 <- rowMeans(refe20)
+refe30 <- rowMeans(refe30)
+refe50 <- rowMeans(refe50)
+```
+
+```{r}
+sp1 <- Skumulowane[,seq(2, 97, by = 6)]
+sp2 <- Skumulowane[,seq(3, 97, by = 6)]
+sp3 <- Skumulowane[,seq(4, 97, by = 6)]
+sp4 <- Skumulowane[,seq(5, 97, by = 6)]
+sp5 <- Skumulowane[,seq(6, 97, by = 6)]
+sp10 <- Skumulowane[,seq(7, 97, by = 6)]
+
+sp1 <- rowMeans(sp1)
+sp2 <- rowMeans(sp2)
+sp3 <- rowMeans(sp3)
+sp4 <- rowMeans(sp4)
+sp5 <- rowMeans(sp5)
+sp10 <- rowMeans(sp10)
+  
+```
+
+
+
+```{r}
+ggplot() +
+  geom_bar(aes(x = factor(1), fill = ifelse(sp1>= 2, "Powyżej 100%", "Poniżej 100%")),
+           color = "white", position = position_fill(reverse = TRUE)) +
+  geom_bar(aes(x = factor(2), fill = ifelse(sp2 >= 2, "Powyżej 100%", "Poniżej 100%")),
+           color = "white", position = position_fill(reverse = TRUE)) +
+  geom_bar(aes(x = factor(3), fill = ifelse(sp3 >= 2, "Powyżej 100%", "Poniżej 100%")),
+           color = "white", position = position_fill(reverse = TRUE)) +
+  geom_bar(aes(x = factor(4), fill = ifelse(sp4 >= 2, "Powyżej 100%", "Poniżej 100%")),
+           color = "white", position = position_fill(reverse = TRUE)) +
+  geom_bar(aes(x = factor(5), fill = ifelse(sp5 >= 2, "Powyżej 100%", "Poniżej 100%")),
+           color = "white", position = position_fill(reverse = TRUE)) +
+  geom_bar(aes(x = factor(6), fill = ifelse(sp10 >= 2, "Powyżej 100%", "Poniżej 100%")),
+           color = "white", position = position_fill(reverse = TRUE)) +
+  scale_x_discrete(labels = c("1 dni", "2 dni", "3 dni","4 dni", "5 dni", "10 dni")) +
+  theme_bw(base_size = 18) +
+  scale_fill_manual(values = c("Powyżej 100%" = "#698B22", "Poniżej 100%" = "#CD3700")) +
+  labs(title = "Okres sprzedaży",
+       x = NULL,
+       fill = NULL)
+```
+
+
+
+
+```{r}
+obroty <- c(230, 254, 239, 261,247,250,251,249,247, 340, 320,321,312, 315)
+ceny <- c(1.7, 1.67, 1.75, 1.69, 1.65, 1.16, 1.71, 1.8, 1.71, 3.8, 3.9, 3.8, 4.0, 4.1)
+
+ggplot() +
+  geom_line(aes(y = obroty, x = c(1:14)), size = 1.2) +
+  theme_light(base_size = 18)+
+  ylim (170, 400)
+```
+
+
+```{r}
+technology <- read_excel("technology.xlsx")
+banking <- read_excel("banking.xlsx")
+energy <- read_excel("energy.xlsx")
+
+library(ggplot2)
+  ggplot(size = 2)+
+  geom_density(aes(x=technology$Skumulowana, color ="Technologia"),size = 1.5)+
+  geom_density(aes(x=banking$Skumulowana, color ="Energetyka"),size = 1.5)+
+  geom_density(aes(x =energy$Skumulowana, color ="Bankowość"),size = 1.5)+
+  geom_vline(xintercept = 1)+
+  scale_color_manual(name = NULL,
+                     breaks = c("Technologia", "Energetyka", "Bankowość" ),
+                     values = c("brown4","red", "salmon3"))+
+  theme_light(base_size=18)+
+  labs(x = "Skumulowana stopa zwrotu")
+```
+
+```{r}
+ggplot() +
+  geom_bar(aes(x = factor(1), fill = ifelse(technology$Skumulowana> 0, "Zysk", "Strata")),
+           color = "white", position = position_fill(reverse = TRUE)) +
+  geom_bar(aes(x = factor(2), fill = ifelse(energy$Skumulowana > 0, "Zysk", "Strata")),
+           color = "white", position = position_fill(reverse = TRUE)) +
+  geom_bar(aes(x = factor(3), fill = ifelse(banking$Skumulowana > 0, "Zysk", "Strata")),
+           color = "white", position = position_fill(reverse = TRUE)) +
+  scale_x_discrete(labels = c("Technologia", "Energetyka", "Bankowość")) +
+  theme_bw(base_size = 18) +
+  scale_fill_manual(values = c("Zysk" = "#698B22", "Strata" = "#CD3700")) +
+  labs(title = NULL,
+       x = NULL,
+       fill = NULL)
+```
+
+
+
+```{r}
+PKO_skumulowana <- read_excel("PKO skumulowana.xlsx")
+PKO_skumulowana$SK <- cumprod(PKO_skumulowana[,1] +1)
+PKO_skumulowana$Data <- Skumulowane[1:200,1]
+
+colnames(PKO_skumulowana) <- c("PKO", "SK", "Data")
+
+```
+
+
+```{r}
+library(dplyr)
+PKO_skumulowana%>%
+ggplot() +
+  geom_line(aes(x = Data$daty, y = SK$PKO ), size = 1.2, color = "#698B22") +
+  theme_light(base_size = 18) +
+  labs(y = "Wartość inwestycji", x = "Data" , title = ) 
+```
+```{r}
+
+wyniki_df <- data.frame(
+  "Nazwa" <- c("1 dzień", "2 dni", "3 dni", "4 dni", "5 dni", "10 dni"),
+  "Wartość" <- c(1.62, 1.76,1.76, 1.81, 1.74, 1.59)
+) 
+
+colnames(wyniki_df) <- c("Nazwa", "Wartość")
+
+wyniki_df$Nazwa <- factor(wyniki_df$Nazwa, levels = c("1 dzień", "2 dni", "3 dni", "4 dni", "5 dni", "10 dni"))
+  
+ggplot(wyniki_df, aes(x = Nazwa, y = Wartość)) +
+  geom_bar(stat = "identity", color = "black", fill = "#698B22") +
+  geom_text(aes(label = round(Wartość, 2)), 
+            vjust = -0.5, # Pozycja nad słupkami
+            size = 5,     # Wielkość tekstu
+            color = "black") +
+  scale_fill_identity() +
+  ylim(0, 2.5)+
+  theme_minimal(base_size = 18) +
+  labs(title = "Mediana",
+       y = "Skumulowana stopa zwrotu",
+       x = NULL)
+```
+
+```{r}
+library(readxl)
+wykres <- read_excel("zestaw_branze.xlsx", 
+    sheet = "Wykres")
+
+wykres <- read_excel("zestaw_branze.xlsx", 
+    sheet = "Stopy_1")
+
+wig_d <- read.csv("C:/Users/olgas/Downloads/wig_d.csv")
+
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+# Konwersja kolumny Data na format Date
+wykres1 <- data.frame (wykres[500:1002,], wig_d$Skumulowana[500:1002])
+wykres1$Data <- as.Date(wykres1$daty)  # Konwersja na klasę Date
+
+# Tworzenie wykresu
+wykres1 %>%
+  ggplot(aes(x = Data)) +
+  geom_line(aes(y = all_10_5_1, color = "#556B2F"), size = 0.7) +
+  geom_line(aes(y= wig_d.Skumulowana.500.1002. ,color = "#CD3700"), size = 0.7) +
+  
+  theme_minimal(base_size = 18) +
+  
+  scale_color_manual(values = (""))
+ 
+  scale_x_date(
+    date_labels = "%Y",  # Formatowanie osi X - tylko lata
+    date_breaks = "1 year"  # Wyświetlanie etykiet co 1 rok
+  ) +
+  labs(
+    y = "Wartość inwestycji",
+    x = "Data",
+    fill = NULL,
+    colour = "Strategia"
+  )
+
+
+```
+# VIX
+
+```{r}
+library(readr)
+VIX <- read_csv("C:/Users/olgas/Downloads/CBOE Volatility Index Historical Data (1).csv")
+```
+
+```{r}
+VIX$Date <- as.Date(VIX$Date, format = "%m/%d/%Y")
+VIX %>%
+  ggplot(aes(x = Date, y = Price, group = 1)) + 
+  geom_line(color = "black") +
+  scale_x_date(
+    date_labels = "%Y",  # Formatowanie osi X - tylko lata
+    date_breaks = "1 year"  # Wyświetlanie etykiet co 1 rok
+  ) +
+  geom_hline(yintercept = quantile(VIX$Price, 0.9), size = 1.2, color = "#556B2F")+
+  theme_minimal(base_size = 14)+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    y = "Cena",
+    x = "Data",
+    fill = NULL,
+    colour = "Strategia"
+  )
+  
+```
+# Momenty o podwyższonej niepewności
+
+
+```{r}
+wy <- data.frame(Stopy$daty, c(Stopy[,2:25]))
+colnames(wy) <- c("data", colnames(Stopy[,2:25]))
+VIX$Date <- as.Date(VIX$Date)
+
+# Obliczenie dat niepewności
+daty_niepwności <- VIX$Date[VIX$Price > quantile(VIX$Price, 0.9)]
+
+daty_pewnosc <-VIX$Date[VIX$Price <= quantile(VIX$Price, 0.9)]
+
+# Konwersja dat w `wy$data` na klasę Date
+wy$data <- as.Date(wy$data)
+
+# Filtrowanie
+wy_niepewnośc <- wy %>%
+  filter(data %in% daty_niepwności)
+
+wy_pewnosc <- wy %>%
+  filter(data %in% daty_pewnosc)
+```
+
+
+```{r}
+library(tidyr)
+returns_long <- wy_niepewnośc %>%
+  pivot_longer(cols = -data, names_to = "Investment", values_to = "Return")
+
+returns_long_v2 <- wy_pewnosc %>%
+  pivot_longer(cols = -data, names_to = "Investment", values_to = "Return")
+
+
+ggplot()+
+  geom_boxplot(aes(x = returns_long$Return, y = 1), size = 1) +
+  geom_boxplot(aes(x = returns_long_v2$Return, y = 2), size = 1) +
+  theme_minimal(base_size = 18)+
+  labs(y = NULL, x = "Stopy zwrotu")
+```
+```{r}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+median_return <- wy_niepewnośc %>%
+  select(-data) %>%    # Wybierz tylko kolumny ze stopami zwrotu
+  unlist() %>%         # Połącz wszystkie dane w jedną wektor
+  mean(na.rm = TRUE) # Oblicz medianę, ignorując NA
+
+print(median_return)
+```
+
+```{r}
+median_return <- wy_pewnosc %>%
+  select(-data) %>%    # Wybierz tylko kolumny ze stopami zwrotu
+  unlist() %>%         # Połącz wszystkie dane w jedną wektor
+  mean(na.rm = TRUE) # Oblicz medianę, ignorując NA
+
+print(median_return)
+```
+
+
+```{r}
+library(dplyr)
+library(lubridate)
+
+return <- Stopy[1:25] %>%
+  pivot_longer(cols = -daty, names_to = "Investment", values_to = "Return")
+
+# Zakładamy, że data_frame to Twój zbiór danych
+# Dodanie kolumny z kwartałem i rokiem
+data_frame <- return %>%
+  mutate(
+    rok_kwartal = paste(year(daty), sprintf("%02d", month(daty)), sep = "_") # Dodanie wiodącego zera do miesiąca
+  )
+
+# Grupowanie i obliczenie mediany
+mediana_kwartaly <- data_frame %>%
+  group_by(rok_kwartal) %>%
+  summarize(
+    Sr_stopa = mean(Return, na.rm = TRUE)
+  ) %>%
+  arrange(rok_kwartal) # Upewnij się, że dane są posortowane chronologicznie
+
+# Ustawienie 'rok_kwartal' jako factor, aby zachować kolejność w wykresach
+mediana_kwartaly$rok_kwartal <- factor(mediana_kwartaly$rok_kwartal, levels = unique(mediana_kwartaly$rok_kwartal))
+
+# Wyświetlenie wyników
+print(mediana_kwartaly)
+```
+
+```{r}
+mediana_kwartaly$Kolor <- ifelse(mediana_kwartaly$Sr_stopa >= 0, "#698B22", "#CD3700")
+
+library(scales)
+
+ggplot(mediana_kwartaly[121:156,], aes(x = rok_kwartal, y = Sr_stopa * 100, fill = Kolor)) +
+  geom_bar(stat = "identity", color = "black") +
+  scale_fill_identity() +
+  scale_y_continuous(labels = label_percent(scale = 1)) + # Konwersja na procenty
+  theme_minimal(base_size = 18) +
+  theme(axis.text.x = element_text(angle = 65, hjust = 1)) +
+  labs(
+    title = NULL,
+    y = "Przeciętne stopy zwrotu",
+    x = NULL
+  )
+```
+#WILCOXIK
+
+```{r}
+wig <- read.csv("C:/Users/olgas/Downloads/wig_d (1).csv")
+wig$Data <- as.Date(wig$Data, format ="%d/%m/%Y")
+Stopy$daty <- as.Date(Stopy$daty , format ="%d/%m/%Y")
+wig_niepewnosc <- wig %>%
+  filter(Data %in% daty_niepwności)
+
+Stopy_niepewnosc <- Stopy[,1:25] %>%
+  filter(daty %in% daty_niepwności)
+
+```
+
+```{r}
+wilcox.test(wig_niepewnosc$Zamkniecie, Stopy_niepewnosc$all_10_1_1)
+```
+```{r}
+wilcox.test(wig_niepewnosc$Zamkniecie, Stopy_niepewnosc$all_10_2_1)
+```
+```{r}
+# Lista na wyniki
+wyniki <- lapply(Stopy_niepewnosc[,2:25], function(kolumna) {
+  # Wykonaj test Wilcoxona dla każdej kolumny
+  wynik <- wilcox.test(wig_niepewnosc$Stopa, kolumna)
+  
+  # Zwróć istotne informacje
+  data.frame(
+    Kolumna = deparse(substitute(kolumna)),  # Nazwa kolumny
+    p_value = round(wynik$p.value, 4) ,              # Wartość p
+    statystyka = wynik$statistic            # Statystyka testu
+  )
+})
+
+# Konwersja listy wyników do ramki danych
+wyniki_df <- do.call(rbind, wyniki)
+
+wyniki_df$Kolumna <- row.names(wyniki_df)
+# Wyświetl wyniki
+print(wyniki_df)
+```
+
+```{r}
+ggplot() +
+  geom_density(aes(x = wig_niepewnosc$Stopa, fill = "WIG"), alpha = 0.6) +
+  geom_density(aes(x = Stopy_niepewnosc$all_20_1_1, fill = "Badana strategia"), alpha = 0.6) +
+  labs(
+    x = "Stopy zwrotu",
+    fill = "Legenda"  # Nazwa legendy
+  ) +
+  theme_minimal(base_size = 18) +
+  scale_fill_manual(
+    values = c("WIG" = "#698B22", "Badana strategia" = "#086E11")
+  ) +
+  xlim(-0.2, 0.2)
+
+  
+  
+```
+
+
+
+```{r}
+ggplot(wyniki_df, aes(x = reorder(Kolumna, p_value), y = p_value)) +
+  geom_bar(stat = "identity", fill = "#508B11", alpha = 0.7) +
+  coord_flip() +  # Odwrócenie osi, aby uzyskać poziomy wykres
+  labs(
+    x = "Strategia",
+    y = "p-value"
+  ) +
+  geom_hline(yintercept = 0.05, color = "red", linetype = "dashed", size = 1) +  # Pozioma linia
+  theme_minimal(base_size = 14)
+```
+
+
+
+
+

@@ -76,6 +76,21 @@ def rate_of_return(df, turn, investment, window): # argumenty : ramka z cenami z
   
     return result
 
+## FILTROWANIE POD BRANŻE ##
+
+banking_sector = [
+    "PKO:PL"
+]
+
+energy_sector = [
+    "PGE:PL", "TPE:PL", "ENA:PL", "ENG:PL", "PEP:PL",
+     "MOL:PL", "LWB:PL", "PKN:PL", "Date"
+]
+
+technology_sector = [
+    "ACP:PL", "CMR:PL", "LVC:PL", "ALL:PL", "ATG:PL",
+    "PSW:PL", "STM:PL", "TMS:PL", "OTM:PL", "CDR:PL", "Date"
+]
 
 
 ## RAMKI ##
@@ -88,6 +103,9 @@ turnovers = pd.read_excel(file_path2)
 prices_cleaned, turnovers_cleaned = clean_data(prices, 'KGH:PL') # Zapisane wyników ( ubyło 209 wierszy )
 
 prices_cleaned.iloc[:, 1:] = prices_cleaned.iloc[:, 1:].applymap(lambda x: pd.to_numeric(x, errors='coerce'))
+
+prices_cleaned = prices_cleaned[banking_sector]
+turnovers_cleaned = turnovers_cleaned[banking_sector]
 
 turnovers_20 = max_turnover(turnovers_cleaned, 20)
 turnovers_10 = max_turnover(turnovers_cleaned, 10)
@@ -136,7 +154,7 @@ dataframes = {
 }
 
 
-with pd.ExcelWriter("rates_data.xlsx", engine="openpyxl") as writer:
+with pd.ExcelWriter("rates_data_PKO.xlsx", engine="openpyxl") as writer:
     for sheet_name, df in dataframes.items():
         df.to_excel(writer, sheet_name=sheet_name, index=False)
 
