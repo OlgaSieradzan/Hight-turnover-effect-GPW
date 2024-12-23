@@ -23,7 +23,7 @@ def daily_returns(df):
             # Oblicz dzienne stopy zwrotu
             rates_values = []  # Pusta lista na dzienne stopy zwrotu
             for i in range(len(df) - 1):
-                rate = (df[col].iloc[i + 1] - df[col].iloc[i]) / df[col].iloc[i]
+                rate =((df[col].iloc[i + 1] - df[col].iloc[i]) / df[col].iloc[i])
                 rates_values.append(rate)  # Dodaj wynik do listy
 
             result[col] = pd.Series(rates_values).reset_index(drop=True)
@@ -187,67 +187,74 @@ capitalizationv3 = capitalizationv2[prices.columns] # ustawienie w tej samej kol
 daily_returns_df = daily_returns(prices)
 
 
-# Do badania na szczecin wybieram spółki o cenie większej niż 0.5 i kapitalizacji większej niż 1 mln złotych 
+# # Do badania na szczecin wybieram spółki o cenie większej niż 0.5 i kapitalizacji większej niż 1 mln złotych 
 
-## JEDEN ## 
+# ## JEDEN ## 
 
-# def one_day(sygnal_df, prices_df, price, kap_min, kap_max,  kap_df)
+# # def one_day(sygnal_df, prices_df, price, kap_min, kap_max,  kap_df)
 
-results_10_1_s = one_day(sygnals['rates_10_1'], prices, 0.5, 0, capitalizationv2, daily_returns_df)
-results_20_1_s = one_day(sygnals['rates_20_1'], prices, 0.5, 0, capitalizationv2, daily_returns_df)
+# results_10_1_s = one_day(sygnals['rates_10_1'], prices, 0.5, 0, capitalizationv2, daily_returns_df)
+# results_20_1_s = one_day(sygnals['rates_20_1'], prices, 0.5, 0, capitalizationv2, daily_returns_df)
 
-results_50_1_s = one_day(sygnals['rates_50_1'], prices, 0.5, 0, capitalizationv2,daily_returns_df)
+# results_50_1_s = one_day(sygnals['rates_50_1'], prices, 0.5, 0, capitalizationv2,daily_returns_df)
 
-# def calculate_results(sygnal_df, prices_df, price, kap_min, kap_max,  kap_df, daily_returns, length):
-## TRZY ##
-
-
-results_10_3_l = calculate_results(sygnals['rates_10_3'], prices, 0.5, 0, float('inf'), capitalizationv2, daily_returns_df,3)
-results_20_3_l = calculate_results(sygnals['rates_20_3'], prices, 0.5, 0, float('inf'), capitalizationv2, daily_returns_df,3)
-
-results_50_3_l = calculate_results(sygnals['rates_50_3'], prices, 0.5, 0, float('inf'), capitalizationv2, daily_returns_df,3)
-
-## PIĘĆ ## 
+# # def calculate_results(sygnal_df, prices_df, price, kap_min, kap_max,  kap_df, daily_returns, length):
+# ## TRZY ##
 
 
+# results_10_3_l = calculate_results(sygnals['rates_10_3'], prices, 0.5, 0, float('inf'), capitalizationv2, daily_returns_df,3)
+# results_20_3_l = calculate_results(sygnals['rates_20_3'], prices, 0.5, 0, float('inf'), capitalizationv2, daily_returns_df,3)
 
-results_10_5_l = calculate_results(sygnals['rates_10_5'], prices, 0.5,0, float('inf'), capitalizationv2, daily_returns_df,5)
-results_20_5_l = calculate_results(sygnals['rates_20_5'], prices, 0.5, 0, float('inf'), capitalizationv2, daily_returns_df,5)
+# results_50_3_l = calculate_results(sygnals['rates_50_3'], prices, 0.5, 0, float('inf'), capitalizationv2, daily_returns_df,3)
 
-results_50_5_l = calculate_results(sygnals['rates_50_5'], prices, 0.5, 0, float('inf'), capitalizationv2, daily_returns_df,5)
-
-## DZIESIĘĆ ##
-
-results_10_10_s = calculate_results(sygnals['rates_10_10'], prices, 0.5,  0, float('inf'), capitalizationv2, daily_returns_df,10)
-results_20_10_s = calculate_results(sygnals['rates_20_10'], prices, 0.5,  0, float('inf'), capitalizationv2, daily_returns_df, 10)
-
-results_50_10_s = calculate_results(sygnals['rates_50_10'], prices, 0.5,  0, float('inf'), capitalizationv2, daily_returns_df, 10)
+# ## PIĘĆ ## 
 
 
 
-results = {
-    "results_10_1_s": results_10_1_s,
-    "results_20_1_s": results_20_1_s,
-    "results_50_1_s": results_50_1_s,
-    "results_10_3_l": results_10_3_l,
-    "results_20_3_l": results_20_3_l,
-    "results_50_3_l": results_50_3_l,
-    "results_10_5_l": results_10_5_l,
-    "results_20_5_l": results_20_5_l,
-    "results_50_5_l": results_50_5_l,
-    "results_10_10_s": results_10_10_s,
-    "results_20_10_s": results_20_10_s,
-    "results_50_10_s": results_50_10_s
-}
+# results_10_5_l = calculate_results(sygnals['rates_10_5'], prices, 0.5,0, float('inf'), capitalizationv2, daily_returns_df,5)
+# results_20_5_l = calculate_results(sygnals['rates_20_5'], prices, 0.5, 0, float('inf'), capitalizationv2, daily_returns_df,5)
 
-# Ścieżka do pliku Excel
-file_name = "results_Szczecin_PKO.xlsx"
+# results_50_5_l = calculate_results(sygnals['rates_50_5'], prices, 0.5, 0, float('inf'), capitalizationv2, daily_returns_df,5)
+
+# ## DZIESIĘĆ ##
+
+# results_10_10_s = calculate_results(sygnals['rates_10_10'], prices, 0.5,  0, float('inf'), capitalizationv2, daily_returns_df,10)
+# results_20_10_s = calculate_results(sygnals['rates_20_10'], prices, 0.5,  0, float('inf'), capitalizationv2, daily_returns_df, 10)
+
+# results_50_10_s = calculate_results(sygnals['rates_50_10'], prices, 0.5,  0, float('inf'), capitalizationv2, daily_returns_df, 10)
+
+
+
+# results = {
+#     "results_10_1_s": results_10_1_s,
+#     "results_20_1_s": results_20_1_s,
+#     "results_50_1_s": results_50_1_s,
+#     "results_10_3_l": results_10_3_l,
+#     "results_20_3_l": results_20_3_l,
+#     "results_50_3_l": results_50_3_l,
+#     "results_10_5_l": results_10_5_l,
+#     "results_20_5_l": results_20_5_l,
+#     "results_50_5_l": results_50_5_l,
+#     "results_10_10_s": results_10_10_s,
+#     "results_20_10_s": results_20_10_s,
+#     "results_50_10_s": results_50_10_s
+# }
+
+# # Ścieżka do pliku Excel
+# file_name = "results_Szczecin_PKO.xlsx"
+
+# # Zapisujemy dane do Excela
+# with pd.ExcelWriter(file_name) as writer:
+#     for sheet_name, df in results.items():
+#         df.to_excel(writer, sheet_name=sheet_name, index=False)
+
+# print(f"Wyniki zostały zapisane w pliku {file_name}")
+
+file_name = "daily_returns.xlsx"
 
 # Zapisujemy dane do Excela
 with pd.ExcelWriter(file_name) as writer:
-    for sheet_name, df in results.items():
-        df.to_excel(writer, sheet_name=sheet_name, index=False)
+        daily_returns_df.to_excel(writer, sheet_name=sheet_name, index=False)
 
 print(f"Wyniki zostały zapisane w pliku {file_name}")
-
 

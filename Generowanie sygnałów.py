@@ -54,6 +54,7 @@ def date_max_turnovers(df, turn, window): # argimenty to : pierwotna tabela/ tal
                     max_values.append(df[col].iloc[i + window]/turn[col].iloc[i])
                 else :
                     max_values.append(np.nan)
+            print(df[col].iloc[i + window]/turn[col].iloc[i])
             result[col] = pd.Series(max_values).reset_index(drop=True)
   
     return result
@@ -104,9 +105,6 @@ prices_cleaned, turnovers_cleaned = clean_data(prices, 'KGH:PL') # Zapisane wyni
 
 prices_cleaned.iloc[:, 1:] = prices_cleaned.iloc[:, 1:].applymap(lambda x: pd.to_numeric(x, errors='coerce'))
 
-prices_cleaned = prices_cleaned[banking_sector]
-turnovers_cleaned = turnovers_cleaned[banking_sector]
-
 turnovers_20 = max_turnover(turnovers_cleaned, 20)
 turnovers_10 = max_turnover(turnovers_cleaned, 10)
 turnovers_50 = max_turnover(turnovers_cleaned, 50)
@@ -115,46 +113,35 @@ result_20 = date_max_turnovers(turnovers_cleaned, turnovers_20, 20)
 result_10 = date_max_turnovers(turnovers_cleaned, turnovers_10, 10)
 result_50 = date_max_turnovers(turnovers_cleaned, turnovers_50, 50)
 
-rates_10_5 = rate_of_return(prices_cleaned, result_10, 5, 10)
-rates_20_5 = rate_of_return(prices_cleaned, result_20, 5, 20)
-rates_50_5 = rate_of_return(prices_cleaned, result_50, 5, 50)
 
-rates_10_1 = rate_of_return(prices_cleaned, result_10, 1, 10)
-rates_20_1 = rate_of_return(prices_cleaned, result_20, 1, 20)
-rates_50_1 = rate_of_return(prices_cleaned, result_50, 1, 50)
+# rates_10_5 = rate_of_return(prices_cleaned, result_10, 5, 10)
+# rates_20_5 = rate_of_return(prices_cleaned, result_20, 5, 20)
+# rates_50_5 = rate_of_return(prices_cleaned, result_50, 5, 50)
 
-rates_10_2 = rate_of_return(prices_cleaned, result_10, 2, 10)
-rates_20_2 = rate_of_return(prices_cleaned, result_20, 2, 20)
-rates_50_2 = rate_of_return(prices_cleaned, result_50, 2, 50)
+# rates_10_1 = rate_of_return(prices_cleaned, result_10, 1, 10)
+# rates_20_1 = rate_of_return(prices_cleaned, result_20, 1, 20)
+# rates_50_1 = rate_of_return(prices_cleaned, result_50, 1, 50)
 
-rates_10_3 = rate_of_return(prices_cleaned, result_10, 3, 10)
-rates_20_3 = rate_of_return(prices_cleaned, result_20, 3, 20)
-rates_50_3 = rate_of_return(prices_cleaned, result_50, 3, 50)
+# rates_10_2 = rate_of_return(prices_cleaned, result_10, 2, 10)
+# rates_20_2 = rate_of_return(prices_cleaned, result_20, 2, 20)
+# rates_50_2 = rate_of_return(prices_cleaned, result_50, 2, 50)
 
-rates_10_10 = rate_of_return(prices_cleaned, result_10, 10, 10)
-rates_20_10 = rate_of_return(prices_cleaned, result_20, 10, 20)
-rates_50_10 = rate_of_return(prices_cleaned, result_50, 10, 50)
+# rates_10_3 = rate_of_return(prices_cleaned, result_10, 3, 10)
+# rates_20_3 = rate_of_return(prices_cleaned, result_20, 3, 20)
+# rates_50_3 = rate_of_return(prices_cleaned, result_50, 3, 50)
+
+# rates_10_10 = rate_of_return(prices_cleaned, result_10, 10, 10)
+# rates_20_10 = rate_of_return(prices_cleaned, result_20, 10, 20)
+# rates_50_10 = rate_of_return(prices_cleaned, result_50, 10, 50)
 
 dataframes = {
-    "rates_10_5": rates_10_5,
-    "rates_20_5": rates_20_5,
-    "rates_50_5": rates_50_5,
-    "rates_10_1": rates_10_1,
-    "rates_20_1": rates_20_1,
-    "rates_50_1": rates_50_1,
-    "rates_10_2": rates_10_2,
-    "rates_20_2": rates_20_2,
-    "rates_50_2": rates_50_2,
-    "rates_10_3": rates_10_3,
-    "rates_20_3": rates_20_3,
-    "rates_50_3": rates_50_3,
-    "rates_10_10": rates_10_10,
-    "rates_20_10": rates_20_10,
-    "rates_50_10": rates_50_10
+    "rates_10": result_10,
+    "rates_20": result_20,
+    "rates_50": result_50,    
 }
 
 
-with pd.ExcelWriter("rates_data_PKO.xlsx", engine="openpyxl") as writer:
+with pd.ExcelWriter("rate_data.xlsx", engine="openpyxl") as writer:
     for sheet_name, df in dataframes.items():
         df.to_excel(writer, sheet_name=sheet_name, index=False)
 
